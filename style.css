@@ -168,20 +168,13 @@ body {
   position: relative;
   z-index: 3;
   text-align: center;
-  padding: 0 20px 11vh;
+  padding: 0 20px 8vh;
   animation: hero-rise 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes hero-rise {
   from { opacity: 0; transform: translateY(24px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-.hero-kicker {
-  font-family: var(--serif-knight);
-  font-size: 14px;
-  color: var(--grey);
-  letter-spacing: 8px;
 }
 
 .hero-title {
@@ -191,16 +184,7 @@ body {
   color: var(--ray);
   letter-spacing: 3px;
   line-height: 1.05;
-  margin-top: 10px;
   text-shadow: 0 0 60px rgba(82, 215, 38, 0.25);
-}
-
-.hero-line {
-  width: 160px;
-  height: 1px;
-  margin: 18px auto 0;
-  background: var(--green);
-  box-shadow: 0 0 12px rgba(82, 215, 38, 0.4);
 }
 
 .hero-sub {
@@ -425,15 +409,6 @@ main { position: relative; z-index: 3; }
 .tweet-main:hover {
   border-color: var(--green);
   box-shadow: 0 0 40px rgba(82, 215, 38, 0.14);
-}
-
-.decree {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--green);
-  letter-spacing: 3px;
-  text-align: center;
-  margin-bottom: 16px;
 }
 
 .tweet-head {
@@ -661,8 +636,6 @@ main { position: relative; z-index: 3; }
 
 .footer-ca-btn:hover { color: var(--green); }
 
-.footer-onchain { display: block; margin-top: 6px; }
-
 /* ---------- toast ---------- */
 
 .toast {
@@ -713,7 +686,6 @@ main { position: relative; z-index: 3; }
   .nav-acquire { padding: 6px 14px; }
 
   .hero-sub { font-size: 17px; }
-  .hero-kicker { font-size: 12px; letter-spacing: 6px; }
   .hero-actions { flex-direction: column; align-items: center; }
   .btn { width: min(300px, 80vw); text-align: center; }
 
