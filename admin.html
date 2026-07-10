@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CONVICTION — The Keep</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Courier+Prime&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --abyss: #050805;
+    --armor: #0D140D;
+    --green: #52D726;
+    --emerald: #1A4020;
+    --ray: #E8F5E4;
+    --grey: #5C6B5C;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--abyss);
+    color: var(--ray);
+    font-family: 'Courier Prime', monospace;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .panel {
+    width: 100%;
+    max-width: 460px;
+    background: var(--armor);
+    border: 1px solid rgba(82, 215, 38, 0.15);
+    border-radius: 6px;
+    padding: 36px 32px;
+  }
+  h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--green);
+    letter-spacing: 5px;
+    text-align: center;
+  }
+  .sub {
+    font-size: 11px;
+    color: var(--grey);
+    text-align: center;
+    letter-spacing: 2px;
+    margin-top: 8px;
+  }
+  label {
+    display: block;
+    font-size: 11px;
+    color: var(--grey);
+    letter-spacing: 2px;
+    margin: 22px 0 6px;
+    text-transform: uppercase;
+  }
+  input {
+    width: 100%;
+    background: var(--abyss);
+    border: 1px solid var(--emerald);
+    border-radius: 4px;
+    color: var(--ray);
+    font-family: 'Courier Prime', monospace;
+    font-size: 13px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.25s ease;
+  }
+  input:focus { border-color: var(--green); }
+  button {
+    width: 100%;
+    margin-top: 28px;
+    background: var(--green);
+    color: var(--abyss);
+    border: none;
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    padding: 13px;
+    cursor: pointer;
+    transition: box-shadow 0.25s ease;
+  }
+  button:hover { box-shadow: 0 0 24px rgba(82, 215, 38, 0.3); }
+  button:disabled { opacity: 0.5; cursor: wait; }
+  .status {
+    margin-top: 16px;
+    font-size: 12px;
+    text-align: center;
+    letter-spacing: 1px;
+    min-height: 16px;
+  }
+  .status.ok { color: var(--green); }
+  .status.err { color: #d75226; }
+</style>
+</head>
+<body>
+  <form class="panel" id="form">
+    <h1>THE KEEP</h1>
+    <p class="sub">conviction — configuration</p>
+
+    <label for="password">admin password</label>
+    <input type="password" id="password" autocomplete="current-password" required>
+
+    <label for="ca">contract address</label>
+    <input type="text" id="ca" spellcheck="false" autocomplete="off">
+
+    <label for="twitter">twitter url</label>
+    <input type="url" id="twitter" spellcheck="false" autocomplete="off">
+
+    <label for="community">community url</label>
+    <input type="url" id="community" spellcheck="false" autocomplete="off">
+
+    <label for="buy">buy url</label>
+    <input type="url" id="buy" spellcheck="false" autocomplete="off">
+
+    <button type="submit" id="save">SWEAR IT</button>
+    <p class="status" id="status"></p>
+  </form>
+
+<script>
+  var FIELDS = ['ca', 'twitter', 'community', 'buy'];
+  var statusEl = document.getElementById('status');
+  var saveBtn = document.getElementById('save');
+
+  function setStatus(text, cls) {
+    statusEl.textContent = text;
+    statusEl.className = 'status' + (cls ? ' ' + cls : '');
+  }
+
+  fetch('/api/config')
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      FIELDS.forEach(function (f) {
+        if (typeof data[f] === 'string') document.getElementById(f).value = data[f];
+      });
+    })
+    .catch(function () { setStatus('could not load current config', 'err'); });
+
+  document.getElementById('form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var config = {};
+    FIELDS.forEach(function (f) { config[f] = document.getElementById(f).value.trim(); });
+
+    saveBtn.disabled = true;
+    setStatus('sealing…');
+
+    fetch('/api/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        password: document.getElementById('password').value,
+        config: config
+      })
+    })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
+      .then(function (res) {
+        if (res.ok) setStatus('sworn.', 'ok');
+        else setStatus(res.data && res.data.error ? res.data.error : 'failed', 'err');
+      })
+      .catch(function () { setStatus('network error', 'err'); })
+      .finally(function () { saveBtn.disabled = false; });
+  });
+</script>
+</body>
+</html>
