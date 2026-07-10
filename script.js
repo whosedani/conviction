@@ -83,6 +83,72 @@
     el.addEventListener('click', copyCA);
   });
 
+  /* ---------- nav: transparent until scrolled ---------- */
+
+  var nav = document.querySelector('.nav');
+
+  function onNavScroll() {
+    if (nav) nav.classList.toggle('scrolled', window.scrollY > 24);
+  }
+
+  window.addEventListener('scroll', onNavScroll, { passive: true });
+  onNavScroll();
+
+  /* ---------- ambient: dust motes rising in the light ray ---------- */
+
+  var canvas = document.getElementById('ambient');
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (canvas && canvas.getContext && !reduceMotion) {
+    var ctx = canvas.getContext('2d');
+    var W = 0;
+    var H = 0;
+    var MOTES = 36;
+    var motes = [];
+
+    function resizeCanvas() {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+
+    function spawnMote(anywhere) {
+      // keep the dust inside the central light ray
+      var band = W * 0.44;
+      return {
+        x: W / 2 + (Math.random() - 0.5) * band,
+        y: anywhere ? Math.random() * H : H + 10,
+        r: 0.6 + Math.random() * 1.5,
+        speed: 0.12 + Math.random() * 0.3,
+        drift: (Math.random() - 0.5) * 0.12,
+        alpha: 0.05 + Math.random() * 0.16,
+        phase: Math.random() * Math.PI * 2
+      };
+    }
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    for (var i = 0; i < MOTES; i++) motes.push(spawnMote(true));
+
+    (function tick(now) {
+      ctx.clearRect(0, 0, W, H);
+      for (var i = 0; i < motes.length; i++) {
+        var m = motes[i];
+        m.y -= m.speed;
+        m.x += m.drift;
+        if (m.y < -12 || m.x < -12 || m.x > W + 12) {
+          motes[i] = m = spawnMote(false);
+        }
+        var twinkle = 0.75 + 0.25 * Math.sin(m.phase + now / 1400);
+        ctx.beginPath();
+        ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(82, 215, 38, ' + (m.alpha * twinkle).toFixed(3) + ')';
+        ctx.fill();
+      }
+      requestAnimationFrame(tick);
+    })(0);
+  }
+
   /* ---------- the archive gallery (looped) ---------- */
 
   var track = document.getElementById('galTrack');
