@@ -376,14 +376,6 @@ main { position: relative; z-index: 3; }
   box-shadow: 0 0 20px rgba(82, 215, 38, 0.15);
 }
 
-.gal-arrow:disabled {
-  opacity: 0.25;
-  cursor: default;
-  border-color: var(--emerald);
-  color: var(--ray);
-  box-shadow: none;
-}
-
 .gal-prev { left: max(16px, calc(50vw - var(--card-w) / 2 - 90px)); }
 .gal-next { right: max(16px, calc(50vw - var(--card-w) / 2 - 90px)); }
 

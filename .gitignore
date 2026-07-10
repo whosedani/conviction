@@ -1,5 +1,7 @@
 .claude/
 .vercel
+# source banner is kept local; the site ships the compressed static/hero.jpg
+static/hero.png
 .env
 .env.local
 node_modules

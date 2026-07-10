@@ -83,18 +83,44 @@
     el.addEventListener('click', copyCA);
   });
 
-  /* ---------- the archive gallery ---------- */
+  /* ---------- the archive gallery (looped) ---------- */
 
   var track = document.getElementById('galTrack');
 
   if (track) {
+    var realCards = Array.prototype.slice.call(track.querySelectorAll('.tweet'));
+    var COUNT = realCards.length;
+
+    // clone the full set on both sides so the loop never has an edge
+    realCards.slice().reverse().forEach(function (card) {
+      var clone = card.cloneNode(true);
+      clone.setAttribute('aria-hidden', 'true');
+      clone.setAttribute('tabindex', '-1');
+      track.insertBefore(clone, track.firstChild);
+    });
+    realCards.forEach(function (card) {
+      var clone = card.cloneNode(true);
+      clone.setAttribute('aria-hidden', 'true');
+      clone.setAttribute('tabindex', '-1');
+      track.appendChild(clone);
+    });
+
     var cards = Array.prototype.slice.call(track.querySelectorAll('.tweet'));
     var prevBtn = document.querySelector('.gal-prev');
     var nextBtn = document.querySelector('.gal-next');
     var counter = document.getElementById('galIndex');
     var ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
-    var current = 0;
+    var current = COUNT;
     var ticking = false;
+    var settleTimer = null;
+
+    function setWidth() {
+      return cards[COUNT].offsetLeft - cards[0].offsetLeft;
+    }
+
+    function centerOf(idx) {
+      return cards[idx].offsetLeft + cards[idx].offsetWidth / 2 - track.clientWidth / 2;
+    }
 
     function nearestCard() {
       var center = track.scrollLeft + track.clientWidth / 2;
@@ -109,39 +135,52 @@
     }
 
     function setActive(idx) {
-      if (idx === current && cards[idx].classList.contains('active')) return;
       current = idx;
       cards.forEach(function (card, i) {
         card.classList.toggle('active', i === idx);
       });
-      if (counter) counter.textContent = ROMAN[idx] || String(idx + 1);
-      if (prevBtn) prevBtn.disabled = idx === 0;
-      if (nextBtn) nextBtn.disabled = idx === cards.length - 1;
+      if (counter) counter.textContent = ROMAN[idx % COUNT];
     }
 
     function scrollToCard(idx) {
-      idx = Math.max(0, Math.min(cards.length - 1, idx));
-      var card = cards[idx];
-      var left = card.offsetLeft + card.offsetWidth / 2 - track.clientWidth / 2;
-      track.scrollTo({ left: left, behavior: 'smooth' });
+      track.scrollTo({ left: centerOf(idx), behavior: 'smooth' });
       setActive(idx);
     }
 
+    // silently teleport back into the middle set once scrolling settles
+    function rebase() {
+      var idx = nearestCard();
+      if (idx < COUNT) {
+        track.scrollLeft += setWidth();
+        setActive(idx + COUNT);
+      } else if (idx >= COUNT * 2) {
+        track.scrollLeft -= setWidth();
+        setActive(idx - COUNT);
+      }
+    }
+
     track.addEventListener('scroll', function () {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(function () {
-        setActive(nearestCard());
-        ticking = false;
-      });
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(function () {
+          setActive(nearestCard());
+          ticking = false;
+        });
+      }
+      clearTimeout(settleTimer);
+      settleTimer = setTimeout(rebase, 120);
     }, { passive: true });
 
     if (prevBtn) prevBtn.addEventListener('click', function () { scrollToCard(current - 1); });
     if (nextBtn) nextBtn.addEventListener('click', function () { scrollToCard(current + 1); });
 
-    window.addEventListener('resize', function () { setActive(nearestCard()); });
+    window.addEventListener('resize', function () {
+      track.scrollLeft = centerOf(current);
+    });
 
-    setActive(0);
+    // start centered on the first real card
+    track.scrollLeft = centerOf(COUNT);
+    setActive(COUNT);
   }
 
   /* ---------- staggered reveal ---------- */
