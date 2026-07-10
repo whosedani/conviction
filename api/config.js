@@ -11,8 +11,8 @@ const DEFAULTS = {
 };
 
 async function kv(path, options) {
-  const url = process.env.KV_REST_API_URL;
-  const token = process.env.KV_REST_API_TOKEN;
+  const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
   if (!url || !token) throw new Error('KV env vars are not configured');
   const res = await fetch(url + path, {
     ...options,
