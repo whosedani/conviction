@@ -83,15 +83,70 @@
     el.addEventListener('click', copyCA);
   });
 
+  /* ---------- the archive gallery ---------- */
+
+  var track = document.getElementById('galTrack');
+
+  if (track) {
+    var cards = Array.prototype.slice.call(track.querySelectorAll('.tweet'));
+    var prevBtn = document.querySelector('.gal-prev');
+    var nextBtn = document.querySelector('.gal-next');
+    var counter = document.getElementById('galIndex');
+    var ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+    var current = 0;
+    var ticking = false;
+
+    function nearestCard() {
+      var center = track.scrollLeft + track.clientWidth / 2;
+      var best = 0;
+      var bestDist = Infinity;
+      cards.forEach(function (card, i) {
+        var cardCenter = card.offsetLeft + card.offsetWidth / 2;
+        var dist = Math.abs(cardCenter - center);
+        if (dist < bestDist) { bestDist = dist; best = i; }
+      });
+      return best;
+    }
+
+    function setActive(idx) {
+      if (idx === current && cards[idx].classList.contains('active')) return;
+      current = idx;
+      cards.forEach(function (card, i) {
+        card.classList.toggle('active', i === idx);
+      });
+      if (counter) counter.textContent = ROMAN[idx] || String(idx + 1);
+      if (prevBtn) prevBtn.disabled = idx === 0;
+      if (nextBtn) nextBtn.disabled = idx === cards.length - 1;
+    }
+
+    function scrollToCard(idx) {
+      idx = Math.max(0, Math.min(cards.length - 1, idx));
+      var card = cards[idx];
+      var left = card.offsetLeft + card.offsetWidth / 2 - track.clientWidth / 2;
+      track.scrollTo({ left: left, behavior: 'smooth' });
+      setActive(idx);
+    }
+
+    track.addEventListener('scroll', function () {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () {
+        setActive(nearestCard());
+        ticking = false;
+      });
+    }, { passive: true });
+
+    if (prevBtn) prevBtn.addEventListener('click', function () { scrollToCard(current - 1); });
+    if (nextBtn) nextBtn.addEventListener('click', function () { scrollToCard(current + 1); });
+
+    window.addEventListener('resize', function () { setActive(nearestCard()); });
+
+    setActive(0);
+  }
+
   /* ---------- staggered reveal ---------- */
 
   var reveals = document.querySelectorAll('.reveal');
-
-  // stagger tweet cards relative to their position in the feed
-  document.querySelectorAll('.feed .tweet').forEach(function (card, i) {
-    card.style.setProperty('--d', (i % 4) * 110 + 'ms');
-  });
-
   var quote = document.querySelector('.quote');
 
   if ('IntersectionObserver' in window) {
