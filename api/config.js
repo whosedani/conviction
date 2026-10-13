@@ -1,12 +1,11 @@
 const crypto = require('crypto');
 
 const KEY = 'conviction:config';
-const FIELDS = ['ca', 'twitter', 'community', 'buy'];
+const FIELDS = ['ca', 'twitter', 'buy'];
 
 const DEFAULTS = {
   ca: '',
   twitter: 'https://x.com/',
-  community: 'https://x.com/',
   buy: 'https://pump.fun/'
 };
 

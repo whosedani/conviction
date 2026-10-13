@@ -6,7 +6,6 @@
   var DEFAULTS = {
     ca: '',
     twitter: 'https://x.com/',
-    community: 'https://x.com/',
     buy: 'https://pump.fun/'
   };
 
@@ -23,10 +22,6 @@
 
     document.querySelectorAll('.js-x').forEach(function (el) {
       el.href = config.twitter || DEFAULTS.twitter;
-    });
-
-    document.querySelectorAll('.js-community').forEach(function (el) {
-      el.href = config.community || DEFAULTS.community;
     });
 
     document.querySelectorAll('.js-buy').forEach(function (el) {
